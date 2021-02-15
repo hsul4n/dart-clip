@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:clip/clip.dart';
 
-import 'user.dart';
-
 void main() {
   runApp(MyApp());
 }
@@ -40,12 +38,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   final _clipKey = GlobalKey<ClipState>();
 
-  final _user = User(
-    id: 1,
-    name: 'User 01',
-    avatar: 'https://avatars2.githubusercontent.com/u/4195236?v=3',
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +53,6 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               ImageClipField(
                 key: ValueKey('avatar'),
-                initialValue: _user.avatar,
                 builder: (context, image) {
                   return CircleAvatar(
                     radius: 56,
