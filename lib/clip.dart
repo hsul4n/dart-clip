@@ -7,13 +7,6 @@ class Clip extends StatefulWidget {
     Key key,
     @required this.child,
     this.onChanged,
-
-    /// prefix filename sush as MY_APP_1234567
-    String prefix,
-
-    /// directory for images in gallery
-    String directory,
-    bool lazy,
     this.onPause,
     this.onResume,
     // add quality to add image quality for all clips
@@ -29,7 +22,6 @@ class Clip extends StatefulWidget {
   final Widget child;
 
   final VoidCallback onChanged;
-
   final VoidCallback onPause;
   final VoidCallback onResume;
 

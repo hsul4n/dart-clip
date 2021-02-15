@@ -2,11 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:clip/clip.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 part '../localizations.dart';
 
@@ -27,20 +25,7 @@ class ImageClipField extends ClipField<Uint8List> {
     List<ClipOption> options = const [ClipOption.zoom, ClipOption.delete],
   }) : super(
           key: key,
-          initialValue: () async {
-            if (initialValue != null) {
-              if (initialValue is Uint8List)
-                return Future.value(initialValue);
-              else if (initialValue is String)
-                return DefaultCacheManager()
-                    .getSingleFile(initialValue)
-                    .then((value) => value.readAsBytes());
-              else
-                throw UnsupportedError('cant get base64');
-            }
-
-            return null;
-          },
+          initialValue: () => Future.value(initialValue),
           onSaved: onSaved,
           builder: (ClipFieldState<Uint8List> field) {
             final _imagePicker = ImagePicker();
@@ -92,13 +77,7 @@ class ImageClipField extends ClipField<Uint8List> {
                                       .whenComplete(field.onResume?.call);
 
                                   if (image != null) {
-                                    image
-                                        .readAsBytes()
-                                        .then(
-                                          (bytes) => FlutterImageCompress
-                                              .compressWithList(bytes),
-                                        )
-                                        .then(onChangedHandler);
+                                    image.readAsBytes().then(onChangedHandler);
                                   }
                                 },
                               ),
