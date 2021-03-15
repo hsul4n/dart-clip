@@ -1,4 +1,4 @@
-# Floosak
+# Clip
 
 A new Flutter project.
 
