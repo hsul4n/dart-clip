@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:clip/l10n/clip_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:clip/clip.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'user.dart';
 
@@ -13,7 +17,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       localizationsDelegates: [
-        const ClipLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        ClipLocalizations.delegate,
       ],
       supportedLocales: [
         const Locale('en'),
@@ -62,10 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ImageClipField(
                 key: ValueKey('avatar'),
                 initialValue: _user.avatar,
-                builder: (context, image) {
+                builder: (context, pickedFile) {
                   return CircleAvatar(
                     radius: 56,
-                    child: image != null
+                    child: pickedFile != null
                         ? null
                         : Center(
                             child: Icon(
@@ -74,7 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: Colors.white,
                             ),
                           ),
-                    backgroundImage: image != null ? MemoryImage(image) : null,
+                    backgroundImage: pickedFile != null
+                        ? FileImage(File(pickedFile.path))
+                        : null,
                   );
                 },
                 onSaved: (avatar) {

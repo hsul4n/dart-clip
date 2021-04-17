@@ -1,40 +1,43 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clip/l10n/clip_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:clip/clip.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
-part '../localizations.dart';
 
 enum ClipOption {
   zoom,
   delete,
 }
 
-class ImageClipField extends ClipField<Uint8List> {
+class ImageClipField extends ClipField<PickedFile> {
   ImageClipField({
     @required Key key,
-    @required Widget Function(BuildContext, Uint8List) builder,
+    @required Widget Function(BuildContext, PickedFile) builder,
     dynamic initialValue,
-    ValueChanged<Uint8List> onChanged,
-    ClipFieldSetter<Uint8List> onSaved,
-    int quality,
+    ValueChanged<PickedFile> onChanged,
+    ClipFieldSetter<PickedFile> onSaved,
+    int quality = 95,
+    double maxWidth,
+    double maxHeight,
     List<ImageSource> sources = const [ImageSource.camera, ImageSource.gallery],
     List<ClipOption> options = const [ClipOption.zoom, ClipOption.delete],
   }) : super(
           key: key,
           initialValue: () async {
             if (initialValue != null) {
-              if (initialValue is Uint8List)
-                return Future.value(initialValue);
-              else if (initialValue is String)
+              if (initialValue is String) {
                 return DefaultCacheManager()
                     .getSingleFile(initialValue)
-                    .then((value) => value.readAsBytes());
+                    .then((value) => PickedFile(value.path));
+              } else if (initialValue is Uint8List)
+                return Future.value(
+                    PickedFile(File.fromRawPath(initialValue).path));
               else
                 throw UnsupportedError('cant get base64');
             }
@@ -42,10 +45,10 @@ class ImageClipField extends ClipField<Uint8List> {
             return null;
           },
           onSaved: onSaved,
-          builder: (ClipFieldState<Uint8List> field) {
+          builder: (ClipFieldState<PickedFile> field) {
             final _imagePicker = ImagePicker();
 
-            void onChangedHandler(Uint8List value) {
+            void onChangedHandler(PickedFile value) {
               if (onChanged != null) {
                 onChanged(value);
               }
@@ -59,8 +62,6 @@ class ImageClipField extends ClipField<Uint8List> {
                 showModalBottomSheet(
                   context: field.context,
                   builder: (BuildContext context) {
-                    final t = _ClipLocalizations.of(field.context);
-
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -73,32 +74,26 @@ class ImageClipField extends ClipField<Uint8List> {
                                       : Icons.photo_library_outlined,
                                 ),
                                 title: Text(
-                                  t[source == ImageSource.camera
-                                      ? 'camera'
-                                      : 'gallery'],
+                                  source == ImageSource.camera
+                                      ? ClipLocalizations.of(context).camera
+                                      : ClipLocalizations.of(context).gallery,
                                 ),
                                 onTap: () async {
                                   Navigator.of(field.context).pop();
 
                                   field.onPause?.call();
 
-                                  final image = await _imagePicker
+                                  final pickedFile = await _imagePicker
                                       .getImage(
                                         source: source,
                                         imageQuality: quality,
-                                        maxHeight: 1024,
-                                        maxWidth: 1024,
+                                        maxHeight: maxHeight,
+                                        maxWidth: maxWidth,
                                       )
                                       .whenComplete(field.onResume?.call);
 
-                                  if (image != null) {
-                                    image
-                                        .readAsBytes()
-                                        .then(
-                                          (bytes) => FlutterImageCompress
-                                              .compressWithList(bytes),
-                                        )
-                                        .then(onChangedHandler);
+                                  if (pickedFile != null) {
+                                    onChangedHandler(pickedFile);
                                   }
                                 },
                               ),
@@ -108,21 +103,22 @@ class ImageClipField extends ClipField<Uint8List> {
                           if (options.contains(ClipOption.zoom))
                             ListTile(
                               leading: Icon(Icons.zoom_out_map_outlined),
-                              title: Text(t['zoom']),
+                              title: Text(ClipLocalizations.of(context).zoom),
                               onTap: () {
-                                Navigator.of(context)
-                                  ..pop()
-                                  ..push(
-                                    MaterialPageRoute(
-                                      builder: (context) => Scaffold(
-                                        appBar: AppBar(),
-                                        body: PhotoView(
-                                          imageProvider:
-                                              MemoryImage(field.value),
+                                field.value.readAsBytes().then((value) {
+                                  Navigator.of(context)
+                                    ..pop()
+                                    ..push(
+                                      MaterialPageRoute(
+                                        builder: (context) => Scaffold(
+                                          appBar: AppBar(),
+                                          body: PhotoView(
+                                            imageProvider: MemoryImage(value),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                });
                               },
                             ),
                           if (options.contains(ClipOption.delete))
@@ -132,7 +128,7 @@ class ImageClipField extends ClipField<Uint8List> {
                                 color: Colors.red[600],
                               ),
                               title: Text(
-                                t['remove'],
+                                ClipLocalizations.of(context).remove,
                                 style: TextStyle(color: Colors.red[600]),
                               ),
                               onTap: () {
@@ -154,7 +150,7 @@ class ImageClipField extends ClipField<Uint8List> {
   _ImageClipFieldState createState() => _ImageClipFieldState();
 }
 
-class _ImageClipFieldState extends ClipFieldState<Uint8List> {
+class _ImageClipFieldState extends ClipFieldState<PickedFile> {
   @override
   ImageClipField get widget => super.widget as ImageClipField;
 }
