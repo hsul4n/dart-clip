@@ -1,10 +1,10 @@
 name: clip
 description: .
-version: 1.0.2
+version: 1.1.0
 homepage: https://github.com/hsul4n/dart-clip
 
 environment:
-  sdk: ">2.6.0 <3.0.0"
+  sdk: ">2.12.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -16,6 +16,7 @@ dependencies:
   photo_view: ^0.11.1
   image_picker: ^0.7.4
   flutter_cache_manager: ^3.0.1
+  flutter_native_image: ^0.0.6
 
 dev_dependencies:
   test: ^1.5.1

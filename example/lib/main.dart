@@ -69,6 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ImageClipField(
                 key: ValueKey('avatar'),
                 initialValue: _user.avatar,
+                quality: 20,
+                maxHeight: 1024,
                 builder: (context, pickedFile) {
                   return CircleAvatar(
                     radius: 56,
@@ -103,9 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _submit() {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() && _clipKey.currentState.validate()) {
       _formKey.currentState.save();
       _clipKey.currentState.save();
+
+      print('Done');
     }
   }
 }

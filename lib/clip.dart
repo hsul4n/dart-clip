@@ -4,34 +4,30 @@ import 'package:flutter/material.dart';
 
 class Clip extends StatefulWidget {
   const Clip({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.onChanged,
-
-    /// prefix filename sush as MY_APP_1234567
-    String prefix,
-
-    /// directory for images in gallery
-    String directory,
-    bool lazy,
     this.onPause,
     this.onResume,
+    this.onWillPop,
+    AutovalidateMode? autovalidateMode,
     // add quality to add image quality for all clips
-  })  : assert(child != null),
+  })  : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
         super(key: key);
 
   static ClipState of(BuildContext context) {
     final _ClipScope scope =
-        context.dependOnInheritedWidgetOfExactType<_ClipScope>();
-    return scope?._clipState;
+        context.dependOnInheritedWidgetOfExactType<_ClipScope>()!;
+    return scope._clipState;
   }
 
   final Widget child;
 
-  final VoidCallback onChanged;
-
-  final VoidCallback onPause;
-  final VoidCallback onResume;
+  final WillPopCallback? onWillPop;
+  final VoidCallback? onChanged;
+  final AutovalidateMode autovalidateMode;
+  final VoidCallback? onPause;
+  final VoidCallback? onResume;
 
   @override
   ClipState createState() => ClipState();
@@ -39,10 +35,13 @@ class Clip extends StatefulWidget {
 
 class ClipState extends State<Clip> {
   int _generation = 0;
+  bool _hasInteractedByUser = false;
   final Set<ClipFieldState<dynamic>> _clips = <ClipFieldState<dynamic>>{};
 
   void _clipDidChange() {
-    if (widget.onChanged != null) widget.onChanged();
+    if (widget.onChanged != null) widget.onChanged!();
+    _hasInteractedByUser =
+        _clips.any((ClipFieldState<dynamic> clip) => clip._hasInteractedByUser);
     _forceRebuild();
   }
 
@@ -62,10 +61,26 @@ class ClipState extends State<Clip> {
 
   @override
   Widget build(BuildContext context) {
-    return _ClipScope(
-      clipState: this,
-      generation: _generation,
-      child: widget.child,
+    switch (widget.autovalidateMode) {
+      case AutovalidateMode.always:
+        _validate();
+        break;
+      case AutovalidateMode.onUserInteraction:
+        if (_hasInteractedByUser) {
+          _validate();
+        }
+        break;
+      case AutovalidateMode.disabled:
+        break;
+    }
+
+    return WillPopScope(
+      onWillPop: widget.onWillPop,
+      child: _ClipScope(
+        clipState: this,
+        generation: _generation,
+        child: widget.child,
+      ),
     );
   }
 
@@ -75,17 +90,31 @@ class ClipState extends State<Clip> {
 
   void reset() {
     for (final ClipFieldState<dynamic> clip in _clips) clip.reset();
+    _hasInteractedByUser = false;
     _clipDidChange();
+  }
+
+  bool validate() {
+    _hasInteractedByUser = true;
+    _forceRebuild();
+    return _validate();
+  }
+
+  bool _validate() {
+    bool hasError = false;
+    for (final ClipFieldState<dynamic> clip in _clips)
+      hasError = !clip.validate() || hasError;
+    return !hasError;
   }
 }
 
 class _ClipScope extends InheritedWidget {
   const _ClipScope({
-    Key key,
-    Widget child,
-    ClipState clipState,
-    int generation,
-  })  : _clipState = clipState,
+    Key? key,
+    required Widget child,
+    required ClipState clipState,
+    required int generation,
+  })   : _clipState = clipState,
         _generation = generation,
         super(key: key, child: child);
 
@@ -99,26 +128,35 @@ class _ClipScope extends InheritedWidget {
   bool updateShouldNotify(_ClipScope old) => _generation != old._generation;
 }
 
-typedef ClipFieldValidator<T> = String Function(T value);
+typedef ClipFieldValidator<T> = String Function(T? value);
 
-typedef ClipFieldSetter<T> = void Function(T newValue);
+typedef ClipFieldSetter<T> = void Function(T? newValue);
 
 typedef ClipFieldBuilder<T> = Widget Function(ClipFieldState<T> clip);
 
 class ClipField<T> extends StatefulWidget {
   const ClipField({
-    Key key,
-    @required this.builder,
+    Key? key,
+    required this.builder,
     this.onSaved,
+    this.validator,
     this.initialValue,
-  })  : assert(builder != null),
+    AutovalidateMode? autovalidateMode,
+    this.enabled = true,
+  })  : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
         super(key: key);
 
-  final ClipFieldSetter<T> onSaved;
+  final bool enabled;
+
+  final AutovalidateMode autovalidateMode;
+
+  final ClipFieldValidator<T>? validator;
+
+  final ClipFieldSetter<T>? onSaved;
 
   final ClipFieldBuilder<T> builder;
 
-  final Future<T> Function() initialValue;
+  final Future<T?> Function()? initialValue;
 
   @override
   ClipFieldState<T> createState() => ClipFieldState<T>();
@@ -127,37 +165,72 @@ class ClipField<T> extends StatefulWidget {
 /// The current state of a [ClipField]. Passed to the [ClipFieldBuilder] method
 /// for use in constructing the clip clip's widget.
 class ClipFieldState<T> extends State<ClipField<T>> {
-  T _value;
+  T? _value;
+  String? _errorText;
+  bool _hasInteractedByUser = false;
 
-  T get value => _value;
+  /// The current value of the form field.
+  T? get value => _value;
+
+  String get errorText => _errorText!;
+
+  bool get hasError => _errorText != null;
+
+  bool get isValid => widget.validator?.call(_value!) == null;
 
   void save() {
-    widget?.onSaved(value);
+    widget.onSaved!(value);
   }
 
   void reset() {
-    widget.initialValue().then((value) {
-      _value = value;
-    }).whenComplete(() => setState(() {}));
+    if (widget.initialValue != null) {
+      widget.initialValue!().then((initialValue) {
+        _value = initialValue;
+        _hasInteractedByUser = false;
+        _errorText = null;
+      }).whenComplete(() {
+        Clip.of(context)._clipDidChange();
+      });
+    } else {
+      _hasInteractedByUser = false;
+      _errorText = null;
+
+      Clip.of(context)._clipDidChange();
+    }
   }
 
-  void didChange(T value) {
+  bool validate() {
+    setState(() {
+      _validate();
+    });
+    return !hasError;
+  }
+
+  void _validate() {
+    if (widget.validator != null) _errorText = widget.validator!(_value!);
+  }
+
+  void didChange(T? value) {
     setState(() {
       _value = value;
     });
-    Clip.of(context)?._clipDidChange();
+    Clip.of(context)._clipDidChange();
   }
 
   void onPause() {
-    Clip.of(context)?.widget?.onPause?.call();
+    if (Clip.of(context).widget.onPause != null) {
+      Clip.of(context).widget.onPause!.call();
+    }
   }
 
   void onResume() {
-    Clip.of(context)?.widget?.onResume?.call();
+    if (Clip.of(context).widget.onResume != null) {
+      Clip.of(context).widget.onResume!.call();
+    }
   }
 
   @protected
-  set value(T value) {
+  set value(T? value) {
     _value = value;
   }
 
@@ -169,13 +242,28 @@ class ClipFieldState<T> extends State<ClipField<T>> {
 
   @override
   void deactivate() {
-    Clip.of(context)?._unregister(this);
+    Clip.of(context)._unregister(this);
     super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
-    Clip.of(context)?._register(this);
+    if (widget.enabled) {
+      switch (widget.autovalidateMode) {
+        case AutovalidateMode.always:
+          _validate();
+          break;
+        case AutovalidateMode.onUserInteraction:
+          if (_hasInteractedByUser) {
+            _validate();
+          }
+          break;
+        case AutovalidateMode.disabled:
+          break;
+      }
+    }
+
+    Clip.of(context)._register(this);
     return widget.builder(this);
   }
 }

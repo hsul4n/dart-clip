@@ -67,7 +67,7 @@ abstract class ClipLocalizations {
   // ignore: unused_field
   final String localeName;
 
-  static ClipLocalizations of(BuildContext context) {
+  static ClipLocalizations? of(BuildContext context) {
     return Localizations.of<ClipLocalizations>(context, ClipLocalizations);
   }
 
