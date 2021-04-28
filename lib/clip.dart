@@ -179,7 +179,7 @@ class ClipFieldState<T> extends State<ClipField<T>> {
   bool get isValid => widget.validator?.call(_value) == null;
 
   void save() {
-    widget.onSaved!(value);
+    if (widget.onSaved != null) widget.onSaved!(value);
   }
 
   void reset() {
