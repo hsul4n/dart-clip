@@ -176,7 +176,7 @@ class ClipFieldState<T> extends State<ClipField<T>> {
 
   bool get hasError => _errorText != null;
 
-  bool get isValid => widget.validator?.call(_value!) == null;
+  bool get isValid => widget.validator?.call(_value) == null;
 
   void save() {
     widget.onSaved!(value);
@@ -207,7 +207,7 @@ class ClipFieldState<T> extends State<ClipField<T>> {
   }
 
   void _validate() {
-    if (widget.validator != null) _errorText = widget.validator!(_value!);
+    if (widget.validator != null) _errorText = widget.validator!(_value);
   }
 
   void didChange(T? value) {

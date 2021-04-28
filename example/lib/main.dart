@@ -71,6 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 initialValue: _user.avatar,
                 quality: 20,
                 maxHeight: 1024,
+                validator: (pickedFile) =>
+                    pickedFile == null ? 'Please upload attachment' : null,
                 builder: (context, pickedFile) {
                   return CircleAvatar(
                     radius: 56,
