@@ -107,9 +107,8 @@ class ImageClipField extends ClipField<PickedFile> {
                                           return await FlutterNativeImage
                                               .compressImage(
                                             pickedFile.path,
-                                            targetWidth: minWidth?.toInt() ?? 0,
-                                            targetHeight:
-                                                minHeight?.toInt() ?? 0,
+                                            targetWidth: minWidth ?? 0,
+                                            targetHeight: minHeight ?? 0,
                                             quality: quality,
                                           );
                                         }
