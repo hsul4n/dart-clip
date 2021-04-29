@@ -24,7 +24,7 @@ class ImageClipField extends ClipField<PickedFile> {
     dynamic initialValue,
     ValueChanged<PickedFile?>? onChanged,
     ClipFieldSetter<PickedFile>? onSaved,
-    int? quality = 50,
+    int quality = 50,
     int? maxHeight,
     int? maxWidth,
     int? minHeight,
@@ -107,9 +107,10 @@ class ImageClipField extends ClipField<PickedFile> {
                                           return await FlutterNativeImage
                                               .compressImage(
                                             pickedFile.path,
-                                            // targetWidth: minWidth,
-                                            // targetHeight: minHeight,
-                                            // quality: quality,
+                                            targetWidth: minWidth?.toInt() ?? 0,
+                                            targetHeight:
+                                                minHeight?.toInt() ?? 0,
+                                            quality: quality,
                                           );
                                         }
                                       }).then((file) {
