@@ -32,6 +32,8 @@ class ImageClipField extends ClipField<PickedFile> {
     ClipFieldValidator<PickedFile>? validator,
     List<ImageSource> sources = const [ImageSource.camera, ImageSource.gallery],
     List<ClipOption> options = const [ClipOption.zoom, ClipOption.delete],
+    bool? enabled,
+    InputDecoration? decoration = const InputDecoration(),
   })  : assert(sources.isNotEmpty),
         assert(options.isNotEmpty),
         super(
@@ -53,24 +55,31 @@ class ImageClipField extends ClipField<PickedFile> {
           },
           onSaved: onSaved,
           validator: validator,
-          builder: (ClipFieldState<PickedFile> state) {
+          enabled: enabled ?? decoration?.enabled ?? true,
+          builder: (ClipFieldState<PickedFile> field) {
+            final InputDecoration effectiveDecoration = (decoration ??
+                    const InputDecoration())
+                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+
             void onChangedHandler(PickedFile? value) {
+              field.didChange(value);
               if (onChanged != null) {
                 onChanged(value);
               }
-
-              state.didChange(value);
             }
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  child: builder(state.context, state.value),
+            return IntrinsicWidth(
+              child: InputDecorator(
+                decoration: effectiveDecoration.copyWith(
+                  errorText: field.hasError ? field.errorText : null,
+                  isCollapsed: true,
+                  border: InputBorder.none,
+                ),
+                child: GestureDetector(
+                  child: builder(field.context, field.value),
                   onTap: () {
                     showModalBottomSheet(
-                      context: state.context,
+                      context: field.context,
                       builder: (BuildContext context) {
                         return Column(
                           mainAxisSize: MainAxisSize.min,
@@ -91,9 +100,9 @@ class ImageClipField extends ClipField<PickedFile> {
                                               .gallery,
                                     ),
                                     onTap: () async {
-                                      Navigator.of(state.context).pop();
+                                      Navigator.of(field.context).pop();
 
-                                      state.onPause.call();
+                                      field.onPause.call();
 
                                       _imagePicker
                                           .getImage(
@@ -117,19 +126,19 @@ class ImageClipField extends ClipField<PickedFile> {
                                           onChangedHandler(
                                               PickedFile(file.path));
                                         }
-                                      }).whenComplete(state.onResume);
+                                      }).whenComplete(field.onResume);
                                     },
                                   ),
                                 )
                                 .toList(),
-                            if (state.value != null) ...[
+                            if (field.value != null) ...[
                               if (options.contains(ClipOption.zoom))
                                 ListTile(
                                   leading: Icon(Icons.zoom_out_map_outlined),
                                   title:
                                       Text(ClipLocalizations.of(context)!.zoom),
                                   onTap: () {
-                                    state.value!.readAsBytes().then((value) {
+                                    field.value!.readAsBytes().then((value) {
                                       Navigator.of(context)
                                         ..pop()
                                         ..push(
@@ -168,15 +177,7 @@ class ImageClipField extends ClipField<PickedFile> {
                     );
                   },
                 ),
-                if (state.hasError)
-                  Text(
-                    state.errorText,
-                    style: Theme.of(state.context)
-                        .textTheme
-                        .caption!
-                        .copyWith(color: Theme.of(state.context).errorColor),
-                  ),
-              ],
+              ),
             );
           },
         );

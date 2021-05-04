@@ -1,8 +1,13 @@
+# 1.1.1
+
+- Implement `decoration` property.
+- Add `enabled` property.
+
 # 1.1.0
 
 - Migrate to nullsaftey.
 - Add validation property.
-- Impelement compressing using `flutter_native_image` package.
+- Implement compressing using `flutter_native_image` package.
 - Update all new changes in `Form` and `FormField` widgets.
 
 # 1.0.2

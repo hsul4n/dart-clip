@@ -63,14 +63,16 @@ class _MyHomePageState extends State<MyHomePage> {
         key: _formKey,
         child: Clip(
           key: _clipKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
+          child: Column(
             children: <Widget>[
               ImageClipField(
                 key: ValueKey('avatar'),
                 initialValue: _user.avatar,
                 quality: 20,
                 maxHeight: 1024,
+                decoration: InputDecoration(
+                  helperText: 'Avatar',
+                ),
                 validator: (pickedFile) =>
                     pickedFile == null ? 'Please upload attachment' : null,
                 builder: (context, pickedFile) {
