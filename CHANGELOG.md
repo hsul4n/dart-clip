@@ -1,3 +1,7 @@
+# 1.1.2
+
+- Remove `IntrinsicWidth` root widget in clip field.
+
 # 1.1.1
 
 - Implement `decoration` property.

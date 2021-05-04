@@ -68,115 +68,110 @@ class ImageClipField extends ClipField<PickedFile> {
               }
             }
 
-            return IntrinsicWidth(
-              child: InputDecorator(
-                decoration: effectiveDecoration.copyWith(
-                  errorText: field.hasError ? field.errorText : null,
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                ),
-                child: GestureDetector(
-                  child: builder(field.context, field.value),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: field.context,
-                      builder: (BuildContext context) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ...sources
-                                .map(
-                                  (source) => ListTile(
-                                    leading: Icon(
-                                      source == ImageSource.camera
-                                          ? Icons.photo_camera_outlined
-                                          : Icons.photo_library_outlined,
-                                    ),
-                                    title: Text(
-                                      source == ImageSource.camera
-                                          ? ClipLocalizations.of(context)!
-                                              .camera
-                                          : ClipLocalizations.of(context)!
-                                              .gallery,
-                                    ),
-                                    onTap: () async {
-                                      Navigator.of(field.context).pop();
-
-                                      field.onPause.call();
-
-                                      _imagePicker
-                                          .getImage(
-                                        source: source,
-                                        imageQuality: quality,
-                                        maxHeight: maxHeight?.toDouble(),
-                                        maxWidth: maxWidth?.toDouble(),
-                                      )
-                                          .then((pickedFile) async {
-                                        if (pickedFile != null) {
-                                          return await FlutterNativeImage
-                                              .compressImage(
-                                            pickedFile.path,
-                                            targetWidth: minWidth ?? 0,
-                                            targetHeight: minHeight ?? 0,
-                                            quality: quality,
-                                          );
-                                        }
-                                      }).then((file) {
-                                        if (file != null) {
-                                          onChangedHandler(
-                                              PickedFile(file.path));
-                                        }
-                                      }).whenComplete(field.onResume);
-                                    },
-                                  ),
-                                )
-                                .toList(),
-                            if (field.value != null) ...[
-                              if (options.contains(ClipOption.zoom))
-                                ListTile(
-                                  leading: Icon(Icons.zoom_out_map_outlined),
-                                  title:
-                                      Text(ClipLocalizations.of(context)!.zoom),
-                                  onTap: () {
-                                    field.value!.readAsBytes().then((value) {
-                                      Navigator.of(context)
-                                        ..pop()
-                                        ..push(
-                                          MaterialPageRoute(
-                                            builder: (context) => Scaffold(
-                                              appBar: AppBar(),
-                                              body: PhotoView(
-                                                imageProvider:
-                                                    MemoryImage(value),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                    });
-                                  },
-                                ),
-                              if (options.contains(ClipOption.delete))
-                                ListTile(
+            return InputDecorator(
+              decoration: effectiveDecoration.copyWith(
+                errorText: field.hasError ? field.errorText : null,
+                isCollapsed: true,
+                border: InputBorder.none,
+              ),
+              child: GestureDetector(
+                child: builder(field.context, field.value),
+                onTap: () {
+                  showModalBottomSheet(
+                    context: field.context,
+                    builder: (BuildContext context) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...sources
+                              .map(
+                                (source) => ListTile(
                                   leading: Icon(
-                                    Icons.delete_outlined,
-                                    color: Colors.red[600],
+                                    source == ImageSource.camera
+                                        ? Icons.photo_camera_outlined
+                                        : Icons.photo_library_outlined,
                                   ),
                                   title: Text(
-                                    ClipLocalizations.of(context)!.remove,
-                                    style: TextStyle(color: Colors.red[600]),
+                                    source == ImageSource.camera
+                                        ? ClipLocalizations.of(context)!.camera
+                                        : ClipLocalizations.of(context)!
+                                            .gallery,
                                   ),
-                                  onTap: () {
-                                    onChangedHandler(null);
-                                    Navigator.of(context).pop();
+                                  onTap: () async {
+                                    Navigator.of(field.context).pop();
+
+                                    field.onPause.call();
+
+                                    _imagePicker
+                                        .getImage(
+                                      source: source,
+                                      imageQuality: quality,
+                                      maxHeight: maxHeight?.toDouble(),
+                                      maxWidth: maxWidth?.toDouble(),
+                                    )
+                                        .then((pickedFile) async {
+                                      if (pickedFile != null) {
+                                        return await FlutterNativeImage
+                                            .compressImage(
+                                          pickedFile.path,
+                                          targetWidth: minWidth ?? 0,
+                                          targetHeight: minHeight ?? 0,
+                                          quality: quality,
+                                        );
+                                      }
+                                    }).then((file) {
+                                      if (file != null) {
+                                        onChangedHandler(PickedFile(file.path));
+                                      }
+                                    }).whenComplete(field.onResume);
                                   },
                                 ),
-                            ]
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
+                              )
+                              .toList(),
+                          if (field.value != null) ...[
+                            if (options.contains(ClipOption.zoom))
+                              ListTile(
+                                leading: Icon(Icons.zoom_out_map_outlined),
+                                title:
+                                    Text(ClipLocalizations.of(context)!.zoom),
+                                onTap: () {
+                                  field.value!.readAsBytes().then((value) {
+                                    Navigator.of(context)
+                                      ..pop()
+                                      ..push(
+                                        MaterialPageRoute(
+                                          builder: (context) => Scaffold(
+                                            appBar: AppBar(),
+                                            body: PhotoView(
+                                              imageProvider: MemoryImage(value),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                  });
+                                },
+                              ),
+                            if (options.contains(ClipOption.delete))
+                              ListTile(
+                                leading: Icon(
+                                  Icons.delete_outlined,
+                                  color: Colors.red[600],
+                                ),
+                                title: Text(
+                                  ClipLocalizations.of(context)!.remove,
+                                  style: TextStyle(color: Colors.red[600]),
+                                ),
+                                onTap: () {
+                                  onChangedHandler(null);
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                          ]
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             );
           },
