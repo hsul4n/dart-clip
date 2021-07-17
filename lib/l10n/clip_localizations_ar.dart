@@ -1,9 +1,7 @@
 
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
-import 'clip_localizations.dart';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
+
+import 'clip_localizations.dart';
 
 /// The translations for Arabic (`ar`).
 class ClipLocalizationsAr extends ClipLocalizations {
