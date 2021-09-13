@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('en'),
         const Locale('ar'),
+        const Locale('fr'),
       ],
       title: 'Flutter Clipy Demo',
       theme: ThemeData(
