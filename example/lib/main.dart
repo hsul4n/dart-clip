@@ -44,7 +44,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _formKey = GlobalKey<FormState>();
   final _clipKey = GlobalKey<ClipState>();
 
   final _user = User(
@@ -59,45 +58,42 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Flutter Clipy Demo Home Page'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Clip(
-          key: _clipKey,
-          child: Column(
-            children: <Widget>[
-              ImageClipField(
-                key: ValueKey('avatar'),
-                initialValue: _user.avatar,
-                quality: 20,
-                maxHeight: 1024,
-                decoration: InputDecoration(
-                  helperText: 'Avatar',
-                ),
-                validator: (pickedFile) =>
-                    pickedFile == null ? 'Please upload attachment' : null,
-                builder: (context, pickedFile) {
-                  return CircleAvatar(
-                    radius: 56,
-                    child: pickedFile != null
-                        ? null
-                        : Center(
-                            child: Icon(
-                              Icons.add_a_photo_outlined,
-                              size: 28,
-                              color: Colors.white,
-                            ),
-                          ),
-                    backgroundImage: pickedFile != null
-                        ? FileImage(File(pickedFile.path))
-                        : null,
-                  );
-                },
-                onSaved: (avatar) {
-                  print(avatar);
-                },
+      body: Clip(
+        key: _clipKey,
+        child: Column(
+          children: <Widget>[
+            ImageClipField(
+              key: ValueKey('avatar'),
+              initialValue: _user.avatar,
+              quality: 20,
+              maxHeight: 1024,
+              decoration: InputDecoration(
+                helperText: 'Avatar',
               ),
-            ],
-          ),
+              validator: (pickedFile) =>
+                  pickedFile == null ? 'Please upload attachment' : null,
+              builder: (context, pickedFile) {
+                return CircleAvatar(
+                  radius: 56,
+                  child: pickedFile != null
+                      ? null
+                      : Center(
+                          child: Icon(
+                            Icons.add_a_photo_outlined,
+                            size: 28,
+                            color: Colors.white,
+                          ),
+                        ),
+                  backgroundImage: pickedFile != null
+                      ? FileImage(File(pickedFile.path))
+                      : null,
+                );
+              },
+              onSaved: (avatar) {
+                print(avatar);
+              },
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -109,8 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _submit() {
-    if (_formKey.currentState.validate() && _clipKey.currentState.validate()) {
-      _formKey.currentState.save();
+    if (_clipKey.currentState.validate()) {
       _clipKey.currentState.save();
 
       print('Done');

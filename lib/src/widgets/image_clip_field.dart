@@ -34,10 +34,12 @@ class ImageClipField extends ClipField<PickedFile> {
     List<ClipOption> options = const [ClipOption.zoom, ClipOption.delete],
     bool? enabled,
     InputDecoration? decoration = const InputDecoration(),
+    AutovalidateMode? autovalidateMode,
   })  : assert(sources.isNotEmpty),
         assert(options.isNotEmpty),
         super(
           key: key,
+          autovalidateMode: autovalidateMode,
           initialValue: () async {
             if (initialValue != null) {
               if (initialValue is String) {
@@ -103,7 +105,7 @@ class ImageClipField extends ClipField<PickedFile> {
                                     field.onPause.call();
 
                                     _imagePicker
-                                        .getImage(
+                                        .pickImage(
                                       source: source,
                                       imageQuality: quality,
                                       maxHeight: maxHeight?.toDouble(),

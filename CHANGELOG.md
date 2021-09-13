@@ -1,3 +1,8 @@
+# 1.1.3
+
+- Add `autovalidateMode` option in image_clip_field.
+- Upgrade ependancies.
+
 # 1.1.2
 
 - Remove `IntrinsicWidth` root widget in clip field.

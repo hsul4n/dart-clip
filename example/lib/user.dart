@@ -17,14 +17,3 @@ class User {
         'avatar': avatar,
       };
 }
-
-// {
-//   /// by one
-//   'avatar': 'file://',
-
-//   /// by list
-//   'attachments': {
-//     'enum_a': 'file://',
-//     'enum_b': 'file://',
-//   }
-// }
