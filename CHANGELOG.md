@@ -1,3 +1,7 @@
+# 1.1.4
+
+- Fix widget width.
+
 # 1.1.3
 
 - Add `autovalidateMode` option in image_clip_field.
