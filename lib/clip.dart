@@ -128,7 +128,7 @@ class _ClipScope extends InheritedWidget {
   bool updateShouldNotify(_ClipScope old) => _generation != old._generation;
 }
 
-typedef ClipFieldValidator<T> = String Function(T? value);
+typedef ClipFieldValidator<T> = String? Function(T? value);
 
 typedef ClipFieldSetter<T> = void Function(T? newValue);
 
