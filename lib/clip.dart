@@ -1,9 +1,11 @@
 export 'src/widgets/image_clip_field.dart';
+export 'src/widgets/clip_grid_view.dart';
+export 'src/widgets/gallery_page.dart';
 
 import 'package:flutter/material.dart';
 
 class Clip extends StatefulWidget {
-  const Clip({
+  Clip({
     Key? key,
     required this.child,
     this.onChanged,
@@ -114,7 +116,7 @@ class _ClipScope extends InheritedWidget {
     required Widget child,
     required ClipState clipState,
     required int generation,
-  })   : _clipState = clipState,
+  })  : _clipState = clipState,
         _generation = generation,
         super(key: key, child: child);
 
@@ -128,7 +130,7 @@ class _ClipScope extends InheritedWidget {
   bool updateShouldNotify(_ClipScope old) => _generation != old._generation;
 }
 
-typedef ClipFieldValidator<T> = String Function(T? value);
+typedef ClipFieldValidator<T> = String? Function(T? value);
 
 typedef ClipFieldSetter<T> = void Function(T? newValue);
 
@@ -150,9 +152,9 @@ class ClipField<T> extends StatefulWidget {
 
   final AutovalidateMode autovalidateMode;
 
-  final ClipFieldValidator<T>? validator;
+  final ClipFieldValidator<T?>? validator;
 
-  final ClipFieldSetter<T>? onSaved;
+  final ClipFieldSetter<T?>? onSaved;
 
   final ClipFieldBuilder<T> builder;
 

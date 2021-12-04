@@ -18,4 +18,7 @@ class ClipLocalizationsEn extends ClipLocalizations {
 
   @override
   String get remove => 'Remove';
+
+  @override
+  String get ofMany => 'Of';
 }

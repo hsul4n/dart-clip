@@ -119,6 +119,12 @@ abstract class ClipLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get remove;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get ofMany;
 }
 
 class _ClipLocalizationsDelegate extends LocalizationsDelegate<ClipLocalizations> {

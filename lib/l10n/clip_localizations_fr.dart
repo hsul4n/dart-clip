@@ -18,4 +18,7 @@ class ClipLocalizationsFr extends ClipLocalizations {
 
   @override
   String get remove => 'Supprimer';
+
+  @override
+  String get ofMany => 'De';
 }

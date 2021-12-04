@@ -18,4 +18,7 @@ class ClipLocalizationsAr extends ClipLocalizations {
 
   @override
   String get remove => 'ازالة';
+
+  @override
+  String get ofMany => 'من';
 }

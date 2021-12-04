@@ -2,5 +2,6 @@
     "gallery": "Gallery",
     "camera": "Camera",
     "zoom": "Zoom",
-    "remove": "Remove"
+    "remove": "Remove",
+    "ofMany": "Of"
 }

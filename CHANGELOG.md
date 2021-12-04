@@ -1,3 +1,11 @@
+# 1.2.0
+
+- Add gallery page.
+- Remove `flutter_native_image` from dependencies and depend on `image_picker` compress.
+- Upgrade to nullsaftey.
+- Add grid view widget.
+- Add mutli select photos.
+
 # 1.1.4
 
 - Fix widget width.

@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:clip/l10n/clip_localizations.dart';
+import 'package:clip/src/widgets/gallery_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:clip/clip.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 enum ClipOption {
@@ -15,21 +15,19 @@ enum ClipOption {
   delete,
 }
 
-class ImageClipField extends ClipField<PickedFile> {
+class ImageClipField extends ClipField<XFile> {
   static final _imagePicker = ImagePicker();
 
   ImageClipField({
     Key? key,
-    required Widget Function(BuildContext, PickedFile?) builder,
+    required Widget Function(BuildContext, XFile?) builder,
     dynamic initialValue,
-    ValueChanged<PickedFile?>? onChanged,
-    ClipFieldSetter<PickedFile>? onSaved,
-    int quality = 50,
+    ValueChanged<XFile?>? onChanged,
+    ClipFieldSetter<XFile>? onSaved,
+    int quality = 100,
     int? maxHeight,
     int? maxWidth,
-    int? minHeight,
-    int? minWidth,
-    ClipFieldValidator<PickedFile>? validator,
+    ClipFieldValidator<XFile>? validator,
     List<ImageSource> sources = const [ImageSource.camera, ImageSource.gallery],
     List<ClipOption> options = const [ClipOption.zoom, ClipOption.delete],
     bool? enabled,
@@ -45,10 +43,9 @@ class ImageClipField extends ClipField<PickedFile> {
               if (initialValue is String) {
                 return DefaultCacheManager()
                     .getSingleFile(initialValue)
-                    .then((value) => PickedFile(value.path));
+                    .then((value) => XFile(value.path));
               } else if (initialValue is Uint8List)
-                return Future.value(
-                    PickedFile(File.fromRawPath(initialValue).path));
+                return Future.value(XFile(File.fromRawPath(initialValue).path));
               else
                 throw UnsupportedError('cant get base64');
             }
@@ -58,12 +55,12 @@ class ImageClipField extends ClipField<PickedFile> {
           onSaved: onSaved,
           validator: validator,
           enabled: enabled ?? decoration?.enabled ?? true,
-          builder: (ClipFieldState<PickedFile> field) {
+          builder: (ClipFieldState<XFile> field) {
             final InputDecoration effectiveDecoration = (decoration ??
                     const InputDecoration())
                 .applyDefaults(Theme.of(field.context).inputDecorationTheme);
 
-            void onChangedHandler(PickedFile? value) {
+            void onChangedHandler(XFile? value) {
               field.didChange(value);
               if (onChanged != null) {
                 onChanged(value);
@@ -113,20 +110,9 @@ class ImageClipField extends ClipField<PickedFile> {
                                         maxHeight: maxHeight?.toDouble(),
                                         maxWidth: maxWidth?.toDouble(),
                                       )
-                                          .then((pickedFile) async {
-                                        if (pickedFile != null) {
-                                          return await FlutterNativeImage
-                                              .compressImage(
-                                            pickedFile.path,
-                                            targetWidth: minWidth ?? 0,
-                                            targetHeight: minHeight ?? 0,
-                                            quality: quality,
-                                          );
-                                        }
-                                      }).then((file) {
+                                          .then((file) {
                                         if (file != null) {
-                                          onChangedHandler(
-                                              PickedFile(file.path));
+                                          onChangedHandler(XFile(file.path));
                                         }
                                       }).whenComplete(field.onResume);
                                     },
@@ -140,21 +126,15 @@ class ImageClipField extends ClipField<PickedFile> {
                                   title:
                                       Text(ClipLocalizations.of(context)!.zoom),
                                   onTap: () {
-                                    field.value!.readAsBytes().then((value) {
-                                      Navigator.of(context)
-                                        ..pop()
-                                        ..push(
-                                          MaterialPageRoute(
-                                            builder: (context) => Scaffold(
-                                              appBar: AppBar(),
-                                              body: PhotoView(
-                                                imageProvider:
-                                                    MemoryImage(value),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                    });
+                                    Navigator.of(context)
+                                      ..pop()
+                                      ..push(
+                                        MaterialPageRoute(
+                                            builder: (context) => GalleryPage(
+                                                    attachments: [
+                                                      File(field.value!.path)
+                                                    ])),
+                                      );
                                   },
                                 ),
                               if (options.contains(ClipOption.delete))
@@ -188,7 +168,7 @@ class ImageClipField extends ClipField<PickedFile> {
   _ImageClipFieldState createState() => _ImageClipFieldState();
 }
 
-class _ImageClipFieldState extends ClipFieldState<PickedFile> {
+class _ImageClipFieldState extends ClipFieldState<XFile> {
   @override
   ImageClipField get widget => super.widget as ImageClipField;
 }
